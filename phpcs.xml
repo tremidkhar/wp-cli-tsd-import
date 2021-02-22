@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<ruleset name="plugin-name">
+
+	<description>A custom ruleset for checking the plugin code standard</description>
+
+	<!-- For help in understanding this file: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml -->
+	<!-- For help in using PHPCS: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage -->
+
+	<!-- What to scan -->
+	<file>.</file>
+
+	<!-- Whenever possible, cache the scan results and re-use those for unchanged files on the next scan. -->
+	<arg name="cache"/>
+
+	<!-- Ignoring Vendor Files and Folders:
+		https://github.com/squizlabs/PHP_CodeSniffer/wiki/Advanced-Usage#ignoring-files-and-folders -->
+	<exclude-pattern>/node_modules/</exclude-pattern>
+	<exclude-pattern>/vendor/</exclude-pattern>
+
+	<!-- How to scan -->
+	<arg value="sp"/> <!-- Show sniff and progress -->
+	<arg name="parallel" value="8"/> <!-- Enables parallel processing when available for faster results. -->
+	<arg name="extensions" value="php"/> <!-- Limit to PHP files only. -->
+
+	<!-- Rules: Check PHP version compatibility - see
+		https://github.com/PHPCompatibility/PHPCompatibilityWP -->
+	<rule ref="PHPCompatibilityWP">
+	<!-- For help in understanding this testVersion:
+		https://github.com/PHPCompatibility/PHPCompatibility#sniffing-your-code-for-compatibility-with-specific-php-versions -->
+		<config name="testVersion" value="7.2-"/>
+	</rule>
+
+	<!-- Rules: WordPress Coding Standards - see
+		https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards -->
+	<config name="minimum_supported_wp_version" value="5.2"/>
+
+	<!-- Set WordPress as the main standard -->
+	<rule ref="WordPress" />
+
+	<!-- Include the WordPress-Extra standard. -->
+	<rule ref="WordPress-Extra"/>
+
+	<!-- Let's also check that everything is properly documented. -->
+	<rule ref="WordPress-Docs"/>
+
+	<!-- Check all globals have the expected prefix. -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="plugin"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Properly Set Text Domain -->
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="plugin"/>
+			</property>
+		</properties>
+	</rule>
+
+</ruleset>

@@ -1,0 +1,38 @@
+# Add any directories, files, or patterns that don't needed to be tracked by version control
+
+# Windows image file cache
+Thumbs.db
+
+# Recycle Bin
+$RECYCLE.BIN/
+
+# Folder config file
+Desktop.ini
+
+# NodeJS Modules
+node_modules
+
+# Log File
+*.log
+
+# Mac crap
+.DS_Store
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+*~
+
+# PhpStorm
+.idea
+
+# Visual Code
+.vscode
+
+# Git File and Folder
+.git
+
+# ZIP file
+*.zip
