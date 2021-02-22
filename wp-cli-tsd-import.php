@@ -38,41 +38,49 @@ class TSD_Import {
 
 		$response = wp_remote_get( $this->endpoint );
 
-		$contents = json_decode( $response['body'] );
-		$no_of_post = count( $contents );
+		// $contents = json_decode( wp_remote_retrieve_body( $response ) );
+		// $headers = json_decode( $response['headers'] );
+		$no_of_post  = wp_remote_retrieve_header( $response, 'x-wp-total' );
+		$no_of_paged = wp_remote_retrieve_header( $response, 'x-wp-totalpages' );
 
 		$progress = \WP_CLI\Utils\make_progress_bar( 'Importing Posts', $no_of_post );
-		foreach ( $contents as $content ) {
 
-			$post = new stdClass();
+		for ( $i = 1; $i <= $no_of_paged; $i++ ) {
+			$response = wp_remote_get( $this->endpoint . '?page=' . $i );
+			$contents = json_decode( wp_remote_retrieve_body( $response ) );
 
-			$post->title = filter_var( $content->title->rendered, FILTER_SANITIZE_STRING );
+			foreach ( $contents as $content ) {
 
-			// Stop further process if post already exists
-			if ( post_exists( $post->title ) ) {
-				continue;
+				$post = new stdClass();
+
+				$post->title = filter_var( $content->title->rendered, FILTER_SANITIZE_STRING );
+
+				// Stop further process if post already exists
+				if ( post_exists( $post->title ) ) {
+					continue;
+				}
+
+				$post->content = $content->content->rendered; // No need to sanitize. See: https://developer.wordpress.org/reference/functions/wp_insert_post/#security .
+
+				$post->status = filter_var( $content->status, FILTER_SANITIZE_STRING );
+
+				$post_id = wp_insert_post(
+					array(
+						'post_title'   => $post->title,
+						'post_content' => $post->content,
+						'post_status'  => $post->status,
+					)
+				);
+
+				if ( is_wp_error( $post_id ) ) {
+					WP_CLI::warning( 'ERROR: ' . $post_id->get_error_message() );
+					continue;
+				}
+
+				$this->set_post_categories( $post_id, $content->categories );
+
+				$progress->tick();
 			}
-
-			$post->content = $content->content->rendered; // No need to sanitize. See: https://developer.wordpress.org/reference/functions/wp_insert_post/#security .
-
-			$post->status = filter_var( $content->status, FILTER_SANITIZE_STRING );
-
-			$post_id = wp_insert_post(
-				array(
-					'post_title'   => $post->title,
-					'post_content' => $post->content,
-					'post_status'  => $post->status,
-				)
-			);
-
-			if ( is_wp_error( $post_id ) ) {
-				WP_CLI::warning( 'ERROR: ' . $post_id->get_error_message() );
-				continue;
-			}
-
-			$this->set_post_categories( $post_id, $content->categories );
-
-			$progress->tick();
 		}
 
 		$progress->finish();
