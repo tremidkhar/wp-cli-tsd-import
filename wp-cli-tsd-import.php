@@ -39,6 +39,9 @@ class TSD_Import {
 		$response = wp_remote_get( $this->endpoint );
 
 		$contents = json_decode( $response['body'] );
+		$no_of_post = count( $contents );
+
+		$progress = \WP_CLI\Utils\make_progress_bar( 'Importing Posts', $no_of_post );
 		foreach ( $contents as $content ) {
 
 			$post = new stdClass();
@@ -64,7 +67,10 @@ class TSD_Import {
 
 			$this->set_post_categories( $post_id, $content->categories );
 
+			$progress->tick();
 		}
+
+		$progress->finish();
 	}
 
 	private function set_post_categories( $post_id, $categories ) {
