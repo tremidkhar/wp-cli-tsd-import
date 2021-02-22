@@ -48,6 +48,11 @@ class TSD_Import {
 
 			$post->title = filter_var( $content->title->rendered, FILTER_SANITIZE_STRING );
 
+			// Stop further process if post already exists
+			if ( post_exists( $post->title ) ) {
+				continue;
+			}
+
 			$post->content = $content->content->rendered; // No need to sanitize. See: https://developer.wordpress.org/reference/functions/wp_insert_post/#security .
 
 			$post->status = filter_var( $content->status, FILTER_SANITIZE_STRING );
