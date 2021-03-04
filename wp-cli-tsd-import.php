@@ -1,5 +1,9 @@
 <?php
 /**
+ * Import post from another WordPress site using wp-cli
+ *
+ * @package tsd-import
+ *
  * Plugin Name:       TSD Import
  * Description:       Import post using wp-cli
  * Version:           0.1.0
@@ -11,10 +15,15 @@ if ( ! defined( 'WP_CLI' ) ) {
 	return;
 }
 
+/**
+ * Main TSD_Import Class
+ */
 class TSD_Import {
 	/**
 	 * Import post from another site.
 	 *
+	 * @param array $args The supply arguments.
+	 * @param array $assoc_args The key value arguments.
 	 * @return void
 	 */
 	public function import( $args, $assoc_args ) {
@@ -36,10 +45,7 @@ class TSD_Import {
 		// Build the endpoint.
 		$this->endpoint = $this->url . 'wp-json/wp/v2/posts/';
 
-		$response = wp_remote_get( $this->endpoint );
-
-		// $contents = json_decode( wp_remote_retrieve_body( $response ) );
-		// $headers = json_decode( $response['headers'] );
+		$response    = wp_remote_get( $this->endpoint );
 		$no_of_post  = wp_remote_retrieve_header( $response, 'x-wp-total' );
 		$no_of_paged = wp_remote_retrieve_header( $response, 'x-wp-totalpages' );
 
@@ -55,7 +61,7 @@ class TSD_Import {
 
 				$post->title = filter_var( $content->title->rendered, FILTER_SANITIZE_STRING );
 
-				// Stop further process if post already exists
+				// Stop further process if post already exists.
 				if ( post_exists( $post->title ) ) {
 					continue;
 				}
@@ -86,6 +92,13 @@ class TSD_Import {
 		$progress->finish();
 	}
 
+	/**
+	 * Set the post category for each of the imported post
+	 *
+	 * @param int   $post_id The id of the new imported post.
+	 * @param array $categories The list of categories to be assign to the post.
+	 * @return void
+	 */
 	private function set_post_categories( $post_id, $categories ) {
 
 		$remote_categories       = array();
@@ -105,7 +118,12 @@ class TSD_Import {
 	}
 }
 
+add_action( 'cli_init', 'tsd_cli_import' );
+/**
+ * Register the custom CLI command for importing post from another WordPress site.
+ *
+ * @return void
+ */
 function tsd_cli_import() {
 	WP_CLI::add_command( 'tsd', 'TSD_Import' );
 }
-add_action( 'cli_init', 'tsd_cli_import' );
