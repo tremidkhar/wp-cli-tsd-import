@@ -16,6 +16,9 @@
 		https://github.com/squizlabs/PHP_CodeSniffer/wiki/Advanced-Usage#ignoring-files-and-folders -->
 	<exclude-pattern>/node_modules/</exclude-pattern>
 	<exclude-pattern>/vendor/</exclude-pattern>
+	<rule ref="WordPress.Files.FileName">
+		<exclude-pattern>tsd-import.php</exclude-pattern>
+	</rule>
 
 	<!-- How to scan -->
 	<arg value="sp"/> <!-- Show sniff and progress -->
@@ -47,7 +50,7 @@
 	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
 		<properties>
 			<property name="prefixes" type="array">
-				<element value="plugin"/>
+				<element value="tsd"/>
 			</property>
 		</properties>
 	</rule>
@@ -56,7 +59,7 @@
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">
-				<element value="plugin"/>
+				<element value="tsd"/>
 			</property>
 		</properties>
 	</rule>
